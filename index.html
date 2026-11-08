@@ -1,100 +1,40 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>2048 - ArpiMC Zone</title>
-<style>
-*{box-sizing:border-box;margin:0;padding:0}
-body{background:#faf8ef;color:#776e65;font-family:Arial,sans-serif;display:flex;justify-content:center;padding:10px}
-.container{max-width:360px;width:100%}
-.nav{display:flex;justify-content:space-between;padding:8px 0}
-.nav a{background:#8f7a66;color:#fff;text-decoration:none;font-weight:900;font-size:11px;padding:6px 12px;border-radius:6px}
-.header{display:flex;justify-content:space-between;align-items:center;padding:10px 0}
-.title{font-size:36px;font-weight:900;color:#776e65}
-.scores{display:flex;gap:8px}
-.sbox{background:#bbada0;color:#fff;padding:6px 12px;border-radius:6px;text-align:center;min-width:60px}
-.sbox b{color:#fff;font-size:16px;display:block}
-.sbox span{font-size:10px}
-.card{background:#bbada0;padding:8px;border-radius:10px;position:relative}
-.board{position:relative;background:#bbada0;border-radius:6px;width:100%;aspect-ratio:1/1;display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:8px}
-.cell{background:rgba(238,228,218,.35);border-radius:5px;aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:22px}
-.tile{position:absolute;width:calc(25% - 8px);height:calc(25% - 8px);display:flex;align-items:center;justify-content:center;border-radius:5px;font-weight:900;font-size:24px;transition:all .1s ease;z-index:2}
-.btn{width:100%;margin-top:10px;background:#8f7a66;color:#fff;border:none;padding:12px;font-weight:900;border-radius:6px;cursor:pointer}
-.how{margin-top:10px;font-size:11px;line-height:1.4}
-</style></head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PTS MC Free 🎮</title>
+  <link rel="stylesheet" href="style.css">
+  <!-- SkinView3D Library -->
+  <script src="https://cdn.jsdelivr.net/npm/skinview3d@3.0.0/bundles/skinview3d.min.js"></script>
+</head>
 <body>
-<div class="container">
-<div class="nav">
-<a href="https://arpimc.zone.id">⬅ ArpiMC Zone</a>
-<a href="https://arpimc.zone.id">OFFICIAL</a>
-</div>
-<div class="header">
-<div class="title">2048</div>
-<div class="scores"><div class="sbox"><span>SCORE</span><b id="score">0</b></div><div class="sbox"><span>BEST</span><b id="best">0</b></div></div>
-</div>
-<div class="card">
-<div class="board" id="board"></div>
-<button class="btn" id="newBtn">🔁 New Game</button>
-</div>
-<div class="how">👆 Swipe / WASD / Arrow untuk geser<br>Gabung angka sama sampai <b>2048</b>!<br><a href="https://arpimc.zone.id" style="color:#8f7a66;font-weight:900">🌐 Kembali ke ArpiMC Zone</a></div>
-</div>
-<script>
-const N=4;
-let grid,score=0,best=0,tiles=[];
-const board=document.getElementById('board');
-const colors={2:'#eee4da',4:'#ede0c8',8:'#f2b179',16:'#f59563',32:'#f67c5f',64:'#f65e3b',128:'#edcf72',256:'#edcc61',512:'#edc850',1024:'#edc53f',2048:'#edc22e',4096:'#3c3a32',8192:'#3c3a32'};
+  <div class="container">
+    <h1>🎮 PTS MC Free</h1>
+    <p class="subtitle">Pilih Pose → Upload Skin → Download Hasil!</p>
 
-function empty(){grid=Array.from({length:N},()=>Array(N).fill(0));score=0;renderScore()}
-function addTile(){let e=[];for(let r=0;r<N;r++)for(let c=0;c<N;c++)if(!grid[r][c])e.push([r,c]);if(!e.length)return;let [r,c]=e[Math.floor(Math.random()*e.length)];grid[r][c]=Math.random()<0.9?2:4}
-function render(){
- board.innerHTML='';
- for(let r=0;r<N;r++)for(let c=0;c<N;c++){let d=document.createElement('div');d.className='cell';board.appendChild(d)}
- document.querySelectorAll('.tile').forEach(t=>t.remove());
- for(let r=0;r<N;r++)for(let c=0;c<N;c++)if(grid[r][c]){
-  let t=document.createElement('div');t.className='tile';t.textContent=grid[r][c];
-  let v=grid[r][c];t.style.background=colors[v]||'#3c3a32';t.style.color=v<=4?'#776e65':'#fff';
-  if(v>1000)t.style.fontSize='18px';
-  t.style.left=`calc(${c*25}% + 8px)`;t.style.top=`calc(${r*25}% + 8px)`;
-  board.appendChild(t);
- }
-}
-function renderScore(){document.getElementById('score').textContent=score;if(score>best)best=score;document.getElementById('best').textContent=best}
+    <!-- Hasil 3D -->
+    <div class="canvas-wrapper">
+      <canvas id="skinCanvas"></canvas>
+    </div>
 
-function slide(row){
- let arr=row.filter(v=>v);let miss=false;
- for(let i=0;i<arr.length-1;i++)if(arr[i]==arr[i+1]){arr[i]*=2;score+=arr[i];arr.splice(i+1,1);miss=true}
- while(arr.length<N)arr.push(0);
- return {arr,changed:miss||arr.some((v,i)=>v!=row[i])};
-}
-function rotate(g){let ng=Array.from({length:N},()=>Array(N).fill(0));for(let r=0;r<N;r++)for(let c=0;c<N;c++)ng[c][N-1-r]=g[r][c];return ng}
-function move(dir){
- let g=grid.map(r=>[...r]),moved=false;
- for(let k=0;k<dir;k++)g=rotate(g);
- for(let r=0;r<N;r++){let {arr,changed}=slide(g[r]);if(changed)moved=true;g[r]=arr}
- for(let k=0;k<(4-dir)%4;k++)g=rotate(g);
- if(moved){grid=g;addTile();render();renderScore();if(isOver())setTimeout(()=>alert('Game Over! Skor:'+score),100)}
-}
-function isOver(){
- for(let r=0;r<N;r++)for(let c=0;c<N;c++)if(!grid[r][c])return false;
- for(let r=0;r<N;r++)for(let c=0;c<N;c++){if(r+1<N&&grid[r][c]==grid[r+1][c])return false;if(c+1<N&&grid[r][c]==grid[r][c+1])return false}
- return true
-}
-function start(){empty();addTile();addTile();render()}
+    <!-- Pilih Pose -->
+    <div class="section">
+      <h3>📸 Pilih Pose</h3>
+      <div id="poseList" class="pose-grid"></div>
+    </div>
 
-document.getElementById('newBtn').onclick=start;
-document.addEventListener('keydown',e=>{
- if(e.key=='ArrowLeft'||e.key=='a')move(0);
- if(e.key=='ArrowUp'||e.key=='w')move(3);
- if(e.key=='ArrowRight'||e.key=='d')move(2);
- if(e.key=='ArrowDown'||e.key=='s')move(1);
-});
-let sx,sy;
-board.addEventListener('touchstart',e=>{sx=e.touches[0].clientX;sy=e.touches[0].clientY});
-board.addEventListener('touchend',e=>{
- let dx=e.changedTouches[0].clientX-sx,dy=e.changedTouches[0].clientY-sy;
- if(Math.abs(dx)>Math.abs(dy)){if(dx>20)move(2);else if(dx<-20)move(0)}else{if(dy>20)move(1);else if(dy<-20)move(3)}
-});
-start();
-</script>
+    <!-- Upload Skin -->
+    <div class="section">
+      <h3>👤 Upload Skin Minecraft</h3>
+      <input type="file" id="skinInput" accept=".png" class="file-input">
+      <p id="skinStatus">Belum ada skin dipilih</p>
+    </div>
+
+    <!-- Tombol Download -->
+    <button id="downloadBtn" class="download-btn" disabled>💾 Download Gambar</button>
+  </div>
+
+  <script src="app.js"></script>
 </body>
-  </html>
+</html>

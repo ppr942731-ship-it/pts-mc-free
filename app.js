@@ -21,7 +21,7 @@ async function init() {
     canvas: canvas,
     width: 380,
     height: 480,
-    skin: "https://files.catbox.moe/456z8k.png", // Skin default sementara
+    skin: "https://files.catbox.moe/ec3mn3.jpg", // Skin default sementara
     animation: new skinview3d.WalkingAnimation()
   });
 
